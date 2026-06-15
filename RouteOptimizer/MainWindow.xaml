@@ -1,0 +1,192 @@
+<Window x:Class="RouteOptimizer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="RouteOptimizer" Height="720" Width="1100" MinHeight="600" MinWidth="800" WindowStartupLocation="CenterScreen">
+    <DockPanel Margin="10">
+        <Border DockPanel.Dock="Top" Background="White" CornerRadius="8" BorderBrush="#DDD" BorderThickness="1" Padding="10" Margin="0,0,0,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Vertical">
+                    <TextBlock x:Name="RoleText" FontSize="18" FontWeight="SemiBold"/>
+                    <TextBlock x:Name="UserText" Foreground="#666"/>
+                </StackPanel>
+                <Button Grid.Column="1" Content="Выйти" Width="100" Click="Logout_Click"/>
+            </Grid>
+        </Border>
+
+        <TabControl x:Name="MainTabs">
+            <TabItem x:Name="RoutesTab" Header="Маршруты">
+                <Grid Margin="4">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Обновить" Click="ReloadRoutes_Click"/>
+                        <Button Content="Добавить" Click="AddRoute_Click"/>
+                        <Button Content="Редактировать" Click="EditRoute_Click"/>
+                        <Button Content="Удалить" Click="DeleteRoute_Click"/>
+                    </StackPanel>
+                    <DataGrid x:Name="RoutesGrid" Grid.Row="1" SelectionMode="Single" SelectionUnit="FullRow">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding RouteId}" Width="60"/>
+                            <DataGridTextColumn Header="Номер" Binding="{Binding RouteNumber}" Width="90"/>
+                            <DataGridTextColumn Header="Тип" Binding="{Binding TransportTypeName}" Width="*"/>
+                            <DataGridTextColumn Header="Оператор" Binding="{Binding OperatorName}" Width="*"/>
+                            <DataGridTextColumn Header="Интервал" Binding="{Binding IntervalMin}" Width="80"/>
+                            <DataGridTextColumn Header="Начало" Binding="{Binding StartTime}" Width="80"/>
+                            <DataGridTextColumn Header="Конец" Binding="{Binding EndTime}" Width="80"/>
+                            <DataGridCheckBoxColumn Header="Активен" Binding="{Binding IsActive}" Width="80"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem x:Name="RouteStopsTab" Header="Остановки маршрута">
+                <Grid Margin="4">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <WrapPanel>
+                        <TextBlock Text="Маршрут:" VerticalAlignment="Center" Margin="4"/>
+                        <ComboBox x:Name="RouteStopsRouteBox" Width="160" SelectionChanged="RouteStopsRouteBox_SelectionChanged" DisplayMemberPath="RouteNumber" SelectedValuePath="RouteId"/>
+                        <Button Content="Добавить остановку" Click="AddRouteStop_Click"/>
+                        <Button Content="Удалить" Click="DeleteRouteStop_Click"/>
+                        <Button Content="Вверх" Click="MoveStopUp_Click"/>
+                        <Button Content="Вниз" Click="MoveStopDown_Click"/>
+                    </WrapPanel>
+                    <DataGrid x:Name="RouteStopsGrid" Grid.Row="1">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Порядок" Binding="{Binding StopOrder}" Width="90"/>
+                            <DataGridTextColumn Header="Остановка" Binding="{Binding StopName}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem x:Name="PassengerFlowTab" Header="Пассажиропоток">
+                <Grid Margin="4">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <WrapPanel>
+                        <TextBlock Text="Маршрут:" VerticalAlignment="Center" Margin="4"/>
+                        <ComboBox x:Name="FlowRouteBox" Width="160" DisplayMemberPath="RouteNumber" SelectedValuePath="RouteId" SelectionChanged="FlowRouteBox_SelectionChanged"/>
+                        <TextBlock Text="Перегон:" VerticalAlignment="Center" Margin="4"/>
+                        <ComboBox x:Name="FlowSegmentBox" Width="420" DisplayMemberPath="Display" SelectedValuePath="SegmentId" SelectionChanged="FlowSegmentBox_SelectionChanged"/>
+                        <Button Content="Сохранить" Click="SaveFlow_Click"/>
+                    </WrapPanel>
+                    <UniformGrid Grid.Row="1" Columns="3" Margin="0,6,0,6">
+                        <StackPanel>
+                            <TextBlock Text="Утро"/>
+                            <TextBox x:Name="MorningBox"/>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="День"/>
+                            <TextBox x:Name="DayBox"/>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="Вечер"/>
+                            <TextBox x:Name="EveningBox"/>
+                        </StackPanel>
+                    </UniformGrid>
+                    <DataGrid x:Name="FlowGrid" Grid.Row="2">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Период" Binding="{Binding TimePeriod}" Width="*"/>
+                            <DataGridTextColumn Header="Пассажиров" Binding="{Binding PassengerCount}" Width="120"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem x:Name="SearchTab" Header="Поиск маршрута">
+                <Grid Margin="4">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <WrapPanel>
+                        <TextBlock Text="Откуда:" VerticalAlignment="Center" Margin="4"/>
+                        <ComboBox x:Name="StartStopBox" Width="240" DisplayMemberPath="StopName" SelectedValuePath="StopId"/>
+                        <TextBlock Text="Куда:" VerticalAlignment="Center" Margin="4"/>
+                        <ComboBox x:Name="EndStopBox" Width="240" DisplayMemberPath="StopName" SelectedValuePath="StopId"/>
+                        <Button Content="Найти" Click="Search_Click"/>
+                    </WrapPanel>
+                    <DataGrid x:Name="SearchGrid" Grid.Row="1">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Маршрут" Binding="{Binding RouteNumber}" Width="120"/>
+                            <DataGridTextColumn Header="Тип" Binding="{Binding TypeName}" Width="*"/>
+                            <DataGridTextColumn Header="Пересадки" Binding="{Binding TransfersCount}" Width="90"/>
+                            <DataGridTextColumn Header="Порядок от" Binding="{Binding StartOrder}" Width="80"/>
+                            <DataGridTextColumn Header="Порядок до" Binding="{Binding EndOrder}" Width="80"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem x:Name="AnalyticsTab" Header="Аналитика">
+                <Grid Margin="4">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Button Content="Обновить отчеты" Click="ReloadAnalytics_Click" HorizontalAlignment="Left"/>
+                    <DataGrid x:Name="LoadsGrid" Grid.Row="1">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Маршрут" Binding="{Binding RouteNumber}" Width="*"/>
+                            <DataGridTextColumn Header="Пассажиров" Binding="{Binding TotalPassengers}" Width="120"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <TextBlock Grid.Row="2" Text="Дублирующие участки" FontWeight="SemiBold" Margin="4"/>
+                    <DataGrid x:Name="DuplicatesGrid" Grid.Row="3">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Маршрут A" Binding="{Binding RouteA}" Width="120"/>
+                            <DataGridTextColumn Header="Маршрут B" Binding="{Binding RouteB}" Width="120"/>
+                            <DataGridTextColumn Header="Общие остановки" Binding="{Binding SharedStops}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem x:Name="ModelingTab" Header="Моделирование">
+                <Grid Margin="4">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Обновить" Click="ReloadModeling_Click"/>
+                        <Button Content="Сохранить изменения" Click="SaveModeling_Click"/>
+                    </StackPanel>
+                    <DataGrid x:Name="ModelRoutesGrid" Grid.Row="1" SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding RouteId}" Width="60"/>
+                            <DataGridTextColumn Header="Маршрут" Binding="{Binding RouteNumber}" Width="120"/>
+                            <DataGridTextColumn Header="Тип" Binding="{Binding TransportTypeName}" Width="*"/>
+                            <DataGridCheckBoxColumn Header="Активен" Binding="{Binding IsActive}" Width="90"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <TextBlock Grid.Row="2" Text="Остановки" FontWeight="SemiBold" Margin="4"/>
+                    <DataGrid x:Name="ModelStopsGrid" Grid.Row="3" SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding StopId}" Width="60"/>
+                            <DataGridTextColumn Header="Остановка" Binding="{Binding StopName}" Width="*"/>
+                            <DataGridTextColumn Header="Тип" Binding="{Binding StopType}" Width="120"/>
+                            <DataGridCheckBoxColumn Header="Активен" Binding="{Binding IsActive}" Width="90"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</Window>
